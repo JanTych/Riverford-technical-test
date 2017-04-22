@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<title>Text File Statistics</title>
+	</head>
+	<body>
+		<input type="file" id="fileInput" />
+		<output id="list"></output>
+	</body>
+	<script>
+        //Check if browser supports needed API.
+		if(window.File && window.FileReader && window.FileList && window.Blob){
+			function readFile(event) {
+			    var file = event.target.files[0];
+				var output = "";
+				
+			    //Check if file exists and is a text file
+				if (!file) {
+                    alert("Failed to load file");
+				} else if(!file.type.match('text.*')){
+				    alert("File is not a text file");
+				} else {
+				    var reader = new FileReader();
+                    //When file reader is ready.
+				    reader.onload = function (e) {
+				        var fileContents = e.target.result;
+                        
+				        //File title
+				        DisplayText(file.name);
+
+				        //Word count
+				        var words = fileContents.split(" ");
+				        DisplayText("Word count: " + words.length);
+
+                        //Line count
+				        var lines = fileContents.split("\n");
+				        DisplayText("Line count: " + lines.length);
+
+                        //Create array of characters in file, excluding spaces.
+                        var characters = fileContents.replace(/ /g, "");
+				        characters = characters.split("");
+
+				        //Word mean, mode and median.
+				        var mean = Mean(words);
+
+				        var mode = Mode(characters);
+
+				        var median = Median(characters);
+
+				        DisplayText("Mean letters per word: " + mean.toFixed(1));
+				        DisplayText("Most common letter and mode: " + mode);
+				        DisplayText("Median letters per word: " + median);
+				    }
+
+				    reader.readAsText(file);
+				}
+			}
+
+            //Display details in list.
+			function DisplayText(text) {
+                document.getElementById('list').innerHTML += '<ul>' + text + '</ul>';
+			}
+
+            //Takes an array of words and gives the mean number of letters per word.
+			function Mean(array) {
+			    var count = 0;
+
+			    for (var i = 0; i < array.length; i++) {
+			        var characters = array[i].split("");
+				    count += characters.length;
+				}
+
+			    return count / array.length;
+			}
+
+		    //Take an array of characters and gives the most common letter and it's number of occurrence.
+			function Mode(array) {
+			    var modeMap = {};
+			    var maxEl = array[0], maxCount = 1;
+
+			    for (var i = 0; i < array.length; i++) {
+			        var el = array[i];
+
+			        if (modeMap[el] == null)
+			            modeMap[el] = 1;
+			        else
+			            modeMap[el]++;
+
+			        if (modeMap[el] > maxCount) {
+			            maxEl = el;
+			            maxCount = modeMap[el];
+			        }
+			    }
+			    return "" + maxEl + ", " + maxCount;
+			}
+
+            //Takes an array of characters, sorts and returns middle character.
+			function Median(array) {
+			    var sortedChar = array.sort();
+			    
+			    return sortedChar[Math.round(sortedChar.length / 2) - 1];
+			}
+
+            //Create event listener for uploading a file to website.
+			document.getElementById('fileInput').addEventListener('change', readFile, false);
+		} else {
+            //if browser doesn't support API, display alert.
+			alert('The File API is not supported in this browser');
+		}
+	</script>
+</html>
